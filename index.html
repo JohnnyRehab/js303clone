@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Acid 303</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <main class="app-shell">
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">Browser Synth</p>
+        <h1>Acid 303</h1>
+        <p class="lede">
+          A web-native Roland TB-303 inspired monosynth, built from the feel of
+          the original `js303` project and redesigned with a playable three-octave keyboard.
+        </p>
+      </div>
+      <button id="activate-audio" class="power-button" type="button">Activate Audio</button>
+    </section>
+
+    <section class="synth-panel">
+      <div class="panel-top">
+        <div class="brand-block">
+          <p class="brand-tag">TB-303 Style Bass Line</p>
+          <div class="status-row">
+            <span class="status-pill" id="audio-status">Audio sleeping</span>
+            <span class="status-pill" id="octave-status">PC octave: 3</span>
+          </div>
+        </div>
+
+        <div class="wave-selector" role="group" aria-label="Waveform selector">
+          <button class="wave-button active" data-waveform="sawtooth" type="button">Saw</button>
+          <button class="wave-button" data-waveform="square" type="button">Square</button>
+        </div>
+      </div>
+
+      <div class="control-bank" id="control-bank">
+        <div class="knob-card">
+          <div class="knob" data-param="cutoff" data-min="180" data-max="4200" data-step="1" data-value="900">
+            <div class="knob-face"><span class="knob-indicator"></span></div>
+          </div>
+          <label>Cutoff</label>
+          <output data-output-for="cutoff">900 Hz</output>
+        </div>
+
+        <div class="knob-card">
+          <div class="knob" data-param="resonance" data-min="0.4" data-max="16" data-step="0.1" data-value="7.5">
+            <div class="knob-face"><span class="knob-indicator"></span></div>
+          </div>
+          <label>Resonance</label>
+          <output data-output-for="resonance">7.5</output>
+        </div>
+
+        <div class="knob-card">
+          <div class="knob" data-param="envMod" data-min="80" data-max="4200" data-step="1" data-value="1800">
+            <div class="knob-face"><span class="knob-indicator"></span></div>
+          </div>
+          <label>Env Mod</label>
+          <output data-output-for="envMod">1800 Hz</output>
+        </div>
+
+        <div class="knob-card">
+          <div class="knob" data-param="decay" data-min="0.12" data-max="1.8" data-step="0.01" data-value="0.72">
+            <div class="knob-face"><span class="knob-indicator"></span></div>
+          </div>
+          <label>Decay</label>
+          <output data-output-for="decay">0.72 s</output>
+        </div>
+
+        <div class="knob-card">
+          <div class="knob" data-param="accent" data-min="0" data-max="1" data-step="0.01" data-value="0.45">
+            <div class="knob-face"><span class="knob-indicator"></span></div>
+          </div>
+          <label>Accent</label>
+          <output data-output-for="accent">45%</output>
+        </div>
+
+        <div class="knob-card">
+          <div class="knob" data-param="glide" data-min="0" data-max="0.35" data-step="0.005" data-value="0.09">
+            <div class="knob-face"><span class="knob-indicator"></span></div>
+          </div>
+          <label>Glide</label>
+          <output data-output-for="glide">90 ms</output>
+        </div>
+
+        <div class="knob-card">
+          <div class="knob" data-param="drive" data-min="0" data-max="1" data-step="0.01" data-value="0.38">
+            <div class="knob-face"><span class="knob-indicator"></span></div>
+          </div>
+          <label>Drive</label>
+          <output data-output-for="drive">38%</output>
+        </div>
+
+        <div class="knob-card">
+          <div class="knob" data-param="tuning" data-min="-12" data-max="12" data-step="0.1" data-value="0">
+            <div class="knob-face"><span class="knob-indicator"></span></div>
+          </div>
+          <label>Tuning</label>
+          <output data-output-for="tuning">0 st</output>
+        </div>
+      </div>
+
+      <div class="utility-row">
+        <button id="accent-toggle" class="toggle-button active" type="button" aria-pressed="true">Accent on attack</button>
+        <button id="hold-toggle" class="toggle-button" type="button" aria-pressed="false">Hold note</button>
+        <button id="panic-button" class="toggle-button danger" type="button">All notes off</button>
+      </div>
+
+      <div class="scope-panel">
+        <div class="scope-copy">
+          <p class="eyebrow">Monitor</p>
+          <h2>Oscilloscope</h2>
+        </div>
+        <canvas id="oscilloscope" width="960" height="220" aria-label="Oscilloscope waveform display"></canvas>
+      </div>
+    </section>
+
+    <section class="keyboard-panel">
+      <div class="keyboard-header">
+        <div>
+          <p class="eyebrow">Performance</p>
+          <h2>3-octave keyboard</h2>
+        </div>
+        <div class="instructions">
+          <p>Play on-screen, or use <kbd>A</kbd> to <kbd>J</kbd> with the black-note keys above them.</p>
+          <p>Use <kbd>Z</kbd> and <kbd>X</kbd> to shift the active PC octave.</p>
+        </div>
+      </div>
+
+      <div class="keyboard-wrap">
+        <div id="keyboard" class="keyboard" aria-label="Three octave piano keyboard"></div>
+      </div>
+    </section>
+
+    <section class="demo-panel">
+      <div class="keyboard-header">
+        <div>
+          <p class="eyebrow">Showcase</p>
+          <h2>Demo performance</h2>
+        </div>
+        <div class="instructions">
+          <p>Load the built-in acid line, play it back, or export the pattern as JSON for sharing.</p>
+          <p>Import edited JSON back into the app to swap in a new demo without changing the code.</p>
+        </div>
+      </div>
+
+      <div class="demo-controls">
+        <button id="load-demo" class="toggle-button active" type="button">Load showcase</button>
+        <button id="play-demo" class="toggle-button" type="button">Play demo</button>
+        <button id="stop-demo" class="toggle-button" type="button">Stop demo</button>
+        <button id="export-demo" class="toggle-button" type="button">Export JSON</button>
+        <button id="import-demo" class="toggle-button" type="button">Import JSON</button>
+      </div>
+
+      <div id="demo-status" class="status-row">
+        <span class="status-pill">Demo ready</span>
+      </div>
+
+      <div id="demo-steps" class="demo-steps" aria-label="Demo step sequence"></div>
+
+      <label class="demo-label" for="demo-data">Demo data</label>
+      <textarea id="demo-data" class="demo-data" spellcheck="false" aria-label="Demo data import export textarea"></textarea>
+    </section>
+  </main>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
