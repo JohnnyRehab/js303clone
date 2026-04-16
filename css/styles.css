@@ -31,6 +31,7 @@ body {
   margin: 0;
   min-height: 100vh;
   font-family: "Avenir Next Condensed", "Futura", "Trebuchet MS", sans-serif;
+  font-size: 14px;
   color: var(--text);
   background:
     linear-gradient(180deg, rgba(82, 44, 16, 0.25), rgba(46, 19, 5, 0.45)),
@@ -51,10 +52,10 @@ label {
 }
 
 .app-shell {
-  width: min(1220px, calc(100vw - 32px));
-  margin: 24px auto;
-  padding: 22px;
-  border-radius: 30px;
+  width: min(1180px, calc(100vw - 24px));
+  margin: 12px auto;
+  padding: 14px;
+  border-radius: 24px;
   background:
     linear-gradient(145deg, rgba(98, 55, 24, 0.96), rgba(27, 18, 12, 0.96)),
     radial-gradient(circle at right top, rgba(255, 208, 95, 0.15), transparent 35%);
@@ -67,7 +68,7 @@ label {
 .synth-panel,
 .keyboard-panel,
 .demo-panel {
-  border-radius: 24px;
+  border-radius: 18px;
   background: linear-gradient(180deg, rgba(40, 28, 20, 0.92), rgba(22, 15, 10, 0.94));
   border: 1px solid rgba(255, 226, 149, 0.18);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
@@ -77,16 +78,16 @@ label {
   display: flex;
   align-items: end;
   justify-content: space-between;
-  gap: 16px;
-  padding: 22px 26px;
-  margin-bottom: 18px;
+  gap: 12px;
+  padding: 14px 18px;
+  margin-bottom: 14px;
 }
 
 .eyebrow {
-  margin: 0 0 6px;
-  letter-spacing: 0.2em;
+  margin: 0 0 4px;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
-  font-size: 0.82rem;
+  font-size: 0.7rem;
   color: var(--accent-soft);
 }
 
@@ -98,17 +99,19 @@ h2 {
 }
 
 h1 {
-  font-size: clamp(2.4rem, 5vw, 4.8rem);
-  line-height: 0.95;
+  font-size: clamp(1.9rem, 3.4vw, 3rem);
+  line-height: 0.92;
 }
 
 h2 {
-  font-size: clamp(1.6rem, 3vw, 2.5rem);
+  font-size: clamp(1.15rem, 1.8vw, 1.55rem);
 }
 
 .lede {
-  margin: 10px 0 0;
-  max-width: 68ch;
+  margin: 6px 0 0;
+  max-width: 58ch;
+  font-size: 0.92rem;
+  line-height: 1.35;
   color: var(--muted);
 }
 
@@ -122,11 +125,21 @@ h2 {
   letter-spacing: 0.04em;
   text-transform: uppercase;
   cursor: pointer;
+  font-size: 0.78rem;
   transition: transform 140ms ease, box-shadow 140ms ease, background 140ms ease;
 }
 
+.power-button:disabled,
+.toggle-button:disabled,
+.wave-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+  transform: none;
+  box-shadow: none;
+}
+
 .power-button {
-  padding: 14px 22px;
+  padding: 11px 18px;
   background: linear-gradient(180deg, #fff3c4, #f2b73c);
   box-shadow: 0 12px 30px rgba(240, 153, 33, 0.25);
 }
@@ -138,8 +151,8 @@ h2 {
 }
 
 .synth-panel {
-  padding: 20px;
-  margin-bottom: 18px;
+  padding: 14px;
+  margin-bottom: 14px;
 }
 
 .panel-top,
@@ -147,48 +160,49 @@ h2 {
 .keyboard-header {
   display: flex;
   justify-content: space-between;
-  gap: 18px;
+  gap: 12px;
 }
 
 .panel-top {
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 14px;
 }
 
 .brand-tag {
-  margin: 0 0 8px;
+  margin: 0 0 6px;
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.1em;
+  font-size: 0.78rem;
 }
 
 .status-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 8px;
 }
 
 .status-pill {
   display: inline-flex;
   align-items: center;
-  min-height: 34px;
-  padding: 0 14px;
+  min-height: 28px;
+  padding: 0 11px;
   border-radius: 999px;
   background: rgba(255, 219, 126, 0.08);
   border: 1px solid rgba(255, 219, 126, 0.18);
   color: var(--accent-soft);
-  font-size: 0.92rem;
+  font-size: 0.8rem;
 }
 
 .wave-selector {
   display: inline-flex;
-  gap: 10px;
+  gap: 8px;
 }
 
 .wave-button,
 .toggle-button {
-  min-height: 40px;
-  padding: 0 16px;
+  min-height: 34px;
+  padding: 0 13px;
   background: linear-gradient(180deg, #ffe8a5, #e0a73b);
 }
 
@@ -206,12 +220,12 @@ h2 {
 .control-bank {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 18px 14px;
+  gap: 10px;
 }
 
 .knob-card {
-  padding: 16px 10px 14px;
-  border-radius: 20px;
+  padding: 10px 8px 10px;
+  border-radius: 16px;
   text-align: center;
   background:
     linear-gradient(180deg, rgba(98, 72, 46, 0.4), rgba(54, 39, 26, 0.18)),
@@ -224,21 +238,23 @@ h2 {
 }
 
 .knob-card label {
-  margin-top: 12px;
+  margin-top: 7px;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   font-weight: 700;
+  font-size: 0.74rem;
 }
 
 .knob-card output {
-  margin-top: 6px;
+  margin-top: 4px;
   color: var(--accent-soft);
+  font-size: 0.76rem;
 }
 
 .knob {
   --rotation: -132deg;
-  width: 100px;
-  height: 100px;
+  width: 78px;
+  height: 78px;
   margin: 0 auto;
   touch-action: none;
   cursor: ns-resize;
@@ -252,51 +268,51 @@ h2 {
   background:
     radial-gradient(circle at 35% 30%, #786652, #2f231a 70%),
     linear-gradient(180deg, #67523c, #221811);
-  border: 4px solid #1f1711;
+  border: 3px solid #1f1711;
   box-shadow:
     inset 0 2px 8px rgba(255, 255, 255, 0.08),
     inset 0 -8px 12px rgba(0, 0, 0, 0.45),
-    0 16px 24px rgba(0, 0, 0, 0.25);
+    0 10px 18px rgba(0, 0, 0, 0.22);
 }
 
 .knob-indicator {
   position: absolute;
   left: 50%;
-  top: 12px;
-  width: 6px;
-  height: 34px;
-  margin-left: -3px;
+  top: 10px;
+  width: 4px;
+  height: 25px;
+  margin-left: -2px;
   border-radius: 99px;
   background: linear-gradient(180deg, #ffedb0, #ff7840);
-  box-shadow: 0 0 16px rgba(255, 126, 58, 0.4);
-  transform-origin: 50% 38px;
+  box-shadow: 0 0 12px rgba(255, 126, 58, 0.35);
+  transform-origin: 50% 29px;
   transform: rotate(var(--rotation));
 }
 
 .utility-row {
   align-items: center;
   flex-wrap: wrap;
-  margin-top: 18px;
+  margin-top: 12px;
 }
 
 .scope-panel {
-  margin-top: 18px;
-  padding: 16px;
-  border-radius: 20px;
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 16px;
   background:
     linear-gradient(180deg, rgba(98, 72, 46, 0.28), rgba(35, 24, 17, 0.32)),
     rgba(255, 255, 255, 0.01);
 }
 
 .scope-copy {
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 #oscilloscope {
   display: block;
   width: 100%;
-  height: 220px;
-  border-radius: 16px;
+  height: 142px;
+  border-radius: 12px;
   background:
     linear-gradient(180deg, rgba(11, 17, 18, 0.95), rgba(16, 29, 25, 0.96)),
     repeating-linear-gradient(
@@ -313,31 +329,46 @@ h2 {
 }
 
 .keyboard-panel {
-  padding: 20px;
+  padding: 14px;
 }
 
 .demo-panel {
-  padding: 20px;
-  margin-top: 18px;
+  padding: 14px;
+  margin-top: 14px;
 }
 
 .demo-controls {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
-  margin-bottom: 14px;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.demo-lockout {
+  display: none;
+  margin: 0 0 10px;
+  padding: 9px 11px;
+  border-radius: 12px;
+  background: rgba(255, 186, 100, 0.12);
+  border: 1px solid rgba(255, 205, 132, 0.18);
+  color: var(--accent-soft);
+  line-height: 1.45;
+}
+
+.demo-lockout.active {
+  display: block;
 }
 
 .demo-steps {
   display: grid;
   grid-template-columns: repeat(16, minmax(0, 1fr));
-  gap: 8px;
-  margin-bottom: 14px;
+  gap: 6px;
+  margin-bottom: 10px;
 }
 
 .demo-step {
-  padding: 10px 6px;
-  border-radius: 14px;
+  padding: 7px 4px;
+  border-radius: 10px;
   text-align: center;
   background:
     linear-gradient(180deg, rgba(97, 71, 45, 0.38), rgba(47, 34, 24, 0.52)),
@@ -365,21 +396,21 @@ h2 {
 }
 
 .demo-step-index {
-  margin-bottom: 4px;
-  font-size: 0.72rem;
+  margin-bottom: 3px;
+  font-size: 0.62rem;
   letter-spacing: 0.08em;
   color: var(--muted);
 }
 
 .demo-step-note {
-  font-size: 0.9rem;
+  font-size: 0.74rem;
   font-weight: 700;
   letter-spacing: 0.05em;
 }
 
 .demo-step-flags {
-  margin-top: 4px;
-  font-size: 0.72rem;
+  margin-top: 3px;
+  font-size: 0.58rem;
   color: var(--accent-soft);
   letter-spacing: 0.08em;
   min-height: 1em;
@@ -387,22 +418,23 @@ h2 {
 
 .demo-label {
   display: inline-block;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   text-transform: uppercase;
   letter-spacing: 0.1em;
   font-weight: 700;
+  font-size: 0.76rem;
 }
 
 .demo-data {
   width: 100%;
-  min-height: 220px;
+  min-height: 118px;
   resize: vertical;
-  padding: 14px 16px;
-  border-radius: 18px;
+  padding: 10px 12px;
+  border-radius: 14px;
   border: 1px solid rgba(255, 219, 126, 0.12);
   background: rgba(18, 20, 16, 0.82);
   color: var(--text);
-  font: 14px/1.45 "SFMono-Regular", "Consolas", monospace;
+  font: 12px/1.35 "SFMono-Regular", "Consolas", monospace;
 }
 
 .demo-data:focus {
@@ -410,14 +442,29 @@ h2 {
   outline-offset: 2px;
 }
 
+.keyboard-panel.demo-locked {
+  position: relative;
+}
+
+.keyboard-panel.demo-locked .keyboard {
+  opacity: 0.5;
+}
+
+.keyboard-panel.demo-locked .instructions::after {
+  content: " Live keyboard is disabled while the demo is playing.";
+  color: var(--accent-soft);
+}
+
 .keyboard-header {
   align-items: end;
-  margin-bottom: 18px;
+  margin-bottom: 10px;
 }
 
 .instructions {
-  max-width: 34rem;
+  max-width: 30rem;
   color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.35;
 }
 
 .instructions p {
@@ -425,26 +472,26 @@ h2 {
 }
 
 .instructions p + p {
-  margin-top: 6px;
+  margin-top: 4px;
 }
 
 kbd {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 1.6rem;
-  min-height: 1.6rem;
-  padding: 0 0.35rem;
+  min-width: 1.35rem;
+  min-height: 1.35rem;
+  padding: 0 0.28rem;
   border-radius: 6px;
   background: rgba(255, 251, 230, 0.12);
   border: 1px solid rgba(255, 240, 198, 0.18);
-  font-size: 0.9rem;
+  font-size: 0.74rem;
   color: var(--text);
 }
 
 .keyboard-wrap {
-  overflow-x: auto;
-  padding-bottom: 8px;
+  overflow: hidden;
+  height: 202px;
 }
 
 .keyboard {
@@ -457,6 +504,8 @@ kbd {
     linear-gradient(180deg, rgba(88, 64, 42, 0.85), rgba(31, 23, 17, 0.85)),
     radial-gradient(circle at center, rgba(255, 227, 143, 0.12), transparent 45%);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  transform: scale(0.74);
+  transform-origin: top left;
 }
 
 .white-key,
@@ -541,6 +590,37 @@ kbd {
   box-shadow: inset 0 0 0 2px rgba(255, 178, 92, 0.55), 0 10px 16px rgba(0, 0, 0, 0.24);
 }
 
+@media (min-width: 1100px) {
+  .app-shell {
+    display: grid;
+    grid-template-columns: minmax(0, 1.36fr) minmax(360px, 0.94fr);
+    gap: 14px;
+    align-items: start;
+  }
+
+  .hero {
+    grid-column: 1 / -1;
+    margin-bottom: 0;
+  }
+
+  .synth-panel {
+    grid-column: 1;
+    grid-row: 2 / span 2;
+    margin-bottom: 0;
+  }
+
+  .keyboard-panel {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  .demo-panel {
+    grid-column: 2;
+    grid-row: 3;
+    margin-top: 0;
+  }
+}
+
 @media (max-width: 980px) {
   .hero,
   .panel-top,
@@ -555,6 +635,16 @@ kbd {
 
   .demo-steps {
     grid-template-columns: repeat(8, minmax(0, 1fr));
+  }
+
+  .keyboard-wrap {
+    overflow-x: auto;
+    height: auto;
+    padding-bottom: 8px;
+  }
+
+  .keyboard {
+    transform: none;
   }
 }
 
@@ -587,14 +677,6 @@ kbd {
   .knob {
     width: 92px;
     height: 92px;
-  }
-
-  .white-key {
-    width: 54px;
-  }
-
-  .keyboard {
-    width: 1010px;
   }
 
   .demo-steps {

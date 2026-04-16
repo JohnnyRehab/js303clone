@@ -71,6 +71,8 @@ const importDemoButton = document.getElementById("import-demo");
 const demoStepsElement = document.getElementById("demo-steps");
 const demoDataElement = document.getElementById("demo-data");
 const demoStatusElement = document.getElementById("demo-status");
+const demoLockoutElement = document.getElementById("demo-lockout");
+const keyboardPanelElement = document.getElementById("keyboard-panel");
 const oscilloscopeCanvas = document.getElementById("oscilloscope");
 const oscilloscopeContext = oscilloscopeCanvas.getContext("2d");
 const waveformButtons = [...document.querySelectorAll(".wave-button")];
@@ -104,6 +106,38 @@ let demoTimer = 0;
 let demoReleaseTimer = 0;
 let demoStepIndex = -1;
 let demoPlaying = false;
+let wavetablePromise = null;
+let wavetableData = null;
+
+function loadWavetableFromImage() {
+  if (wavetablePromise) {
+    return wavetablePromise;
+  }
+
+  wavetablePromise = new Promise((resolve, reject) => {
+    const image = new Image();
+
+    image.onload = () => {
+      const canvas = document.createElement("canvas");
+      const context = canvas.getContext("2d", { willReadFrequently: true });
+      canvas.width = image.width;
+      canvas.height = image.height;
+      context.drawImage(image, 0, 0);
+
+      const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+      wavetableData = new Float32Array(imageData.data.buffer.slice(0));
+      resolve(wavetableData);
+    };
+
+    image.onerror = () => {
+      reject(new Error("Could not load wavetable.png"));
+    };
+
+    image.src = "data/wavetable.png";
+  });
+
+  return wavetablePromise;
+}
 
 class AcidSynth {
   constructor() {
@@ -115,11 +149,13 @@ class AcidSynth {
     this.postFilter = this.context.createBiquadFilter();
     this.drive = this.context.createWaveShaper();
     this.vca = this.context.createGain();
-    this.oscillator = this.context.createOscillator();
     this.analyser = this.context.createAnalyser();
+    this.sourceBus = this.context.createGain();
+    this.activeSource = null;
+    this.activeSourceGain = null;
+    this.currentMidi = null;
+    this.currentPlaybackRate = 0;
 
-    this.oscillator.type = state.waveform;
-    this.oscillator.frequency.value = 220;
     this.filter.type = "lowpass";
     this.filter.Q.value = state.params.resonance;
     this.postFilter.type = "highpass";
@@ -130,7 +166,7 @@ class AcidSynth {
     this.analyser.fftSize = 2048;
     this.analyser.smoothingTimeConstant = 0.75;
 
-    this.oscillator.connect(this.preDrive);
+    this.sourceBus.connect(this.preDrive);
     this.preDrive.connect(this.filter);
     this.filter.connect(this.drive);
     this.drive.connect(this.postFilter);
@@ -141,7 +177,6 @@ class AcidSynth {
     this.output.connect(this.context.destination);
 
     this.lastNote = null;
-    this.oscillator.start();
 
     this.applySettings();
   }
@@ -160,11 +195,83 @@ class AcidSynth {
   }
 
   applySettings() {
-    this.oscillator.type = state.waveform;
     this.filter.frequency.setTargetAtTime(Math.max(70, state.params.cutoff), this.context.currentTime, 0.03);
     this.filter.Q.setTargetAtTime(state.params.resonance, this.context.currentTime, 0.02);
     this.drive.curve = AcidSynth.makeDriveCurve(state.params.drive);
     this.drive.oversample = "4x";
+  }
+
+  buildWavetableBuffer(midiNote) {
+    const waveformOffset = state.waveform === "square" ? 524288 : 0;
+    const noteIndex = clamp(Math.round(midiNote), 0, 127);
+    const sampleOffset = waveformOffset + (noteIndex << 12);
+    const frameCount = 4096;
+    const buffer = this.context.createBuffer(1, frameCount, this.context.sampleRate);
+    const channelData = buffer.getChannelData(0);
+
+    for (let index = 0; index < frameCount; index += 1) {
+      channelData[index] = wavetableData[sampleOffset + index] || 0;
+    }
+
+    return buffer;
+  }
+
+  replaceSource(midiNote, frequency, glideTime) {
+    const now = this.context.currentTime;
+    const source = this.context.createBufferSource();
+    const sourceGain = this.context.createGain();
+    const wavetableBuffer = this.buildWavetableBuffer(midiNote);
+    const baseFrequency = this.context.sampleRate / wavetableBuffer.length;
+    const playbackRate = frequency / baseFrequency;
+
+    source.buffer = wavetableBuffer;
+    source.loop = true;
+    source.connect(sourceGain);
+    sourceGain.connect(this.sourceBus);
+    sourceGain.gain.setValueAtTime(0.0001, now);
+
+    source.playbackRate.setValueAtTime(Math.max(0.001, playbackRate), now);
+    source.start(now);
+
+    if (this.activeSource && this.activeSourceGain) {
+      this.activeSourceGain.gain.cancelScheduledValues(now);
+      this.activeSourceGain.gain.setValueAtTime(Math.max(0.0001, this.activeSourceGain.gain.value), now);
+      this.activeSourceGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.03);
+      this.activeSource.stop(now + 0.05);
+    }
+
+    sourceGain.gain.linearRampToValueAtTime(1, now + Math.max(0.005, glideTime * 0.6));
+    this.activeSource = source;
+    this.activeSourceGain = sourceGain;
+    this.currentMidi = midiNote;
+    this.currentPlaybackRate = playbackRate;
+  }
+
+  glideSourceTo(midiNote, frequency, glideTime) {
+    if (!this.activeSource) {
+      this.replaceSource(midiNote, frequency, glideTime);
+      return;
+    }
+
+    const now = this.context.currentTime;
+    const targetPlaybackRate = frequency / (this.context.sampleRate / 4096);
+
+    this.activeSource.playbackRate.cancelScheduledValues(now);
+    this.activeSource.playbackRate.setValueAtTime(
+      Math.max(0.001, this.currentPlaybackRate || this.activeSource.playbackRate.value),
+      now
+    );
+    this.activeSource.playbackRate.linearRampToValueAtTime(
+      Math.max(0.001, targetPlaybackRate),
+      now + Math.max(0.012, glideTime)
+    );
+
+    this.currentMidi = midiNote;
+    this.currentPlaybackRate = targetPlaybackRate;
+  }
+
+  hasLiveSource() {
+    return Boolean(this.activeSource);
   }
 
   ensureRunning() {
@@ -179,7 +286,7 @@ class AcidSynth {
   }
 
   playNote(midiNote, options = {}) {
-    const { accented = false } = options;
+    const { accented = false, slide = false } = options;
     const now = this.context.currentTime;
     const tunedMidi = midiNote + state.params.tuning;
     const targetFrequency = 440 * Math.pow(2, (tunedMidi - 69) / 12);
@@ -190,11 +297,14 @@ class AcidSynth {
     const attackGain = accented && state.accentEnabled ? 0.44 + state.params.accent * 0.3 : 0.32;
     const sustainGain = accented && state.accentEnabled ? 0.16 + state.params.accent * 0.08 : 0.11;
 
-    this.oscillator.frequency.cancelScheduledValues(now);
     this.filter.frequency.cancelScheduledValues(now);
     this.vca.gain.cancelScheduledValues(now);
 
-    this.oscillator.frequency.setTargetAtTime(targetFrequency, now, glideTime / 3);
+    if (slide && this.activeSource) {
+      this.glideSourceTo(midiNote, targetFrequency, glideTime);
+    } else {
+      this.replaceSource(midiNote, targetFrequency, glideTime);
+    }
     this.filter.frequency.setValueAtTime(Math.max(80, baseCutoff * 0.8), now);
     this.filter.frequency.linearRampToValueAtTime(envelopePeak, now + 0.01);
     this.filter.frequency.exponentialRampToValueAtTime(Math.max(70, baseCutoff), now + decayTime);
@@ -218,6 +328,13 @@ class AcidSynth {
     const now = this.context.currentTime;
     this.vca.gain.cancelScheduledValues(now);
     this.vca.gain.setValueAtTime(0.0001, now);
+
+    if (this.activeSource) {
+      this.activeSource.stop(now + 0.02);
+      this.activeSource = null;
+      this.activeSourceGain = null;
+    }
+    this.currentPlaybackRate = 0;
   }
 }
 
@@ -332,6 +449,15 @@ function clamp(value, min, max) {
 
 function setDemoStatus(message) {
   demoStatusElement.innerHTML = `<span class="status-pill">${message}</span>`;
+}
+
+function updateDemoInteractionLock() {
+  loadDemoButton.disabled = demoPlaying;
+  importDemoButton.disabled = demoPlaying;
+  demoDataElement.disabled = demoPlaying;
+  playDemoButton.disabled = demoPlaying;
+  demoLockoutElement.classList.toggle("active", demoPlaying);
+  keyboardPanelElement.classList.toggle("demo-locked", demoPlaying);
 }
 
 function formatValue(param, value) {
@@ -501,6 +627,9 @@ function buildKeyboard() {
 
     key.addEventListener("pointerdown", async (event) => {
       event.preventDefault();
+      if (demoPlaying) {
+        return;
+      }
       stopDemoPlayback(false);
       heldPointerNotes.add(note);
       await ensureSynth();
@@ -621,6 +750,7 @@ function stopDemoPlayback(manual = true) {
   demoStepIndex = -1;
   clearDemoTimers();
   renderDemoSteps();
+  updateDemoInteractionLock();
   if (synthEngine) {
     synthEngine.releaseNote();
   }
@@ -642,7 +772,7 @@ function scheduleDemoStep() {
 
   if (step.gate && step.note !== null) {
     activateVisual(step.note);
-    synthEngine.playNote(step.note, { accented: step.accent });
+    synthEngine.playNote(step.note, { accented: step.accent, slide: step.slide });
 
     if (!step.slide) {
       demoReleaseTimer = window.setTimeout(() => {
@@ -670,6 +800,7 @@ async function startDemoPlayback() {
   clearHeldNotes();
   demoPlaying = true;
   demoStepIndex = -1;
+  updateDemoInteractionLock();
   setDemoStatus(`Playing demo: ${state.demo.name}`);
   scheduleDemoStep();
 }
@@ -720,6 +851,11 @@ function getLatestHeldNote() {
 }
 
 function activateNote(note, source) {
+  const isLegatoGesture =
+    synthEngine &&
+    synthEngine.hasLiveSource() &&
+    (heldPcKeys.size + heldPointerNotes.size > 1 || state.holdEnabled || state.latchedNote !== null);
+
   if (state.latchedNote !== null && state.latchedNote !== note) {
     deactivateVisual(state.latchedNote);
     state.latchedNote = null;
@@ -728,7 +864,7 @@ function activateNote(note, source) {
   activateVisual(note);
 
   if (synthEngine) {
-    synthEngine.playNote(note, { accented: state.accentEnabled });
+    synthEngine.playNote(note, { accented: state.accentEnabled, slide: isLegatoGesture });
   }
 
   if (source === "pointer") {
@@ -752,7 +888,7 @@ function deactivateNote(note, source) {
     activateVisual(fallbackNote);
 
     if (synthEngine) {
-      synthEngine.playNote(fallbackNote, { accented: state.accentEnabled });
+      synthEngine.playNote(fallbackNote, { accented: state.accentEnabled, slide: true });
     }
 
     return;
@@ -781,12 +917,15 @@ function heldPcKeysHasValue(note) {
 }
 
 async function ensureSynth() {
+  await loadWavetableFromImage();
+
   if (!synthEngine) {
     synthEngine = new AcidSynth();
   }
 
   await synthEngine.ensureRunning();
   startOscilloscope();
+  audioStatus.textContent = "Audio awake / PNG wavetable loaded";
 }
 
 function clearHeldNotes() {
@@ -861,7 +1000,6 @@ function setupButtons() {
 
   waveformButtons.forEach((button) => {
     button.addEventListener("click", async () => {
-      stopDemoPlayback(false);
       waveformButtons.forEach((candidate) => candidate.classList.remove("active"));
       button.classList.add("active");
       state.waveform = button.dataset.waveform;
@@ -899,6 +1037,9 @@ function setupPcKeyboard() {
     }
 
     event.preventDefault();
+    if (demoPlaying) {
+      return;
+    }
     const note = (state.activePcOctave + 1) * 12 + mapping.semitone;
 
     stopDemoPlayback(false);
@@ -928,3 +1069,11 @@ setupButtons();
 setupPcKeyboard();
 drawOscilloscopeIdle();
 loadDemoData(cloneDemoData(DEFAULT_DEMO));
+updateDemoInteractionLock();
+loadWavetableFromImage().then(() => {
+  if (audioStatus.textContent === "Audio sleeping") {
+    audioStatus.textContent = "Audio sleeping / PNG wavetable ready";
+  }
+}).catch(() => {
+  audioStatus.textContent = "Wavetable image failed to load";
+});

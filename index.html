@@ -117,7 +117,7 @@
       </div>
     </section>
 
-    <section class="keyboard-panel">
+    <section id="keyboard-panel" class="keyboard-panel">
       <div class="keyboard-header">
         <div>
           <p class="eyebrow">Performance</p>
@@ -156,6 +156,10 @@
 
       <div id="demo-status" class="status-row">
         <span class="status-pill">Demo ready</span>
+      </div>
+
+      <div id="demo-lockout" class="demo-lockout" aria-live="polite">
+        During demo playback, starting live keyboard play, loading a different demo, and importing new demo JSON are disabled.
       </div>
 
       <div id="demo-steps" class="demo-steps" aria-label="Demo step sequence"></div>
