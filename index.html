@@ -17,7 +17,10 @@
           the original `js303` project and redesigned with a playable three-octave keyboard.
         </p>
       </div>
-      <button id="activate-audio" class="power-button" type="button">Activate Audio</button>
+      <div class="hero-scope">
+        <p class="eyebrow">Oscilloscope</p>
+        <canvas id="oscilloscope" width="420" height="110" aria-label="Oscilloscope waveform display"></canvas>
+      </div>
     </section>
 
     <section class="synth-panel">
@@ -106,14 +109,6 @@
         <button id="accent-toggle" class="toggle-button active" type="button" aria-pressed="true">Accent on attack</button>
         <button id="hold-toggle" class="toggle-button" type="button" aria-pressed="false">Hold note</button>
         <button id="panic-button" class="toggle-button danger" type="button">All notes off</button>
-      </div>
-
-      <div class="scope-panel">
-        <div class="scope-copy">
-          <p class="eyebrow">Monitor</p>
-          <h2>Oscilloscope</h2>
-        </div>
-        <canvas id="oscilloscope" width="960" height="220" aria-label="Oscilloscope waveform display"></canvas>
       </div>
     </section>
 

@@ -59,7 +59,6 @@ const noteLabels = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", 
 const keyboardElement = document.getElementById("keyboard");
 const audioStatus = document.getElementById("audio-status");
 const octaveStatus = document.getElementById("octave-status");
-const activateAudioButton = document.getElementById("activate-audio");
 const holdToggle = document.getElementById("hold-toggle");
 const accentToggle = document.getElementById("accent-toggle");
 const panicButton = document.getElementById("panic-button");
@@ -370,7 +369,7 @@ function drawOscilloscopeIdle() {
 
   oscilloscopeContext.fillStyle = "rgba(255, 235, 181, 0.55)";
   oscilloscopeContext.font = '16px "Avenir Next Condensed", "Futura", sans-serif';
-  oscilloscopeContext.fillText("Activate audio to start the scope", 24, 30);
+  oscilloscopeContext.fillText("Touch a key or Play Demo to wake audio", 14, 24);
 }
 
 function cloneDemoData(data) {
@@ -940,10 +939,6 @@ function clearHeldNotes() {
 }
 
 function setupButtons() {
-  activateAudioButton.addEventListener("click", async () => {
-    await ensureSynth();
-  });
-
   holdToggle.addEventListener("click", () => {
     state.holdEnabled = !state.holdEnabled;
     holdToggle.classList.toggle("active", state.holdEnabled);
