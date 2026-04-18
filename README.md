@@ -8,5 +8,5 @@ https://github.com/thedjinn/js303
 <br>
 <br>
 And mine demo page is :<br>
-https://johnnyrehab.github.io/js303clone/
+https://johnnyrehab.github.io/js303-inspired/
 <br>
